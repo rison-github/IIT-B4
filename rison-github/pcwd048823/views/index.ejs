@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <style>
+    body
+        {
+            font-family: Century GOthic, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            font-size: 24px;
+            text-align: justify;
+        }
+    h1
+        {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 24px;
+            margin: 24px;
+            font-family: Times New Roman, sans-serif;
+            font-size: 33px;
+        }
+    .form-content
+        {
+            background-color: #000000;
+            padding: 24px;
+            margin: 24px;
+            border: 3px solid gray;
+        }
+    input[type=number], input[type=text], input[type=date]
+        {
+            width: 80%;
+            padding: 24px;
+            margin: 24px;
+            display: inline-block;
+            background-color: #ffffff;
+            resize: both;
+        }
+    input[type=number]:focus, input[type=text]:focus, input[type=date]:focus
+        {
+            background-color: #808080;
+            outline: none;
+        }
+    button
+        {
+            overflow: hidden;
+            float: right;
+            display: inline-block;
+            cursor: pointer;
+            outline: none;
+            background-color: #000000;
+            box-shadow: 0 3px #808080;
+            border: 3px solid gray;
+            color: #808080;
+            padding: 3px;
+            margin: 3px;
+        }
+    button:hover
+        {
+            background-color: #ffffff;
+        }
+    button:active
+        {
+            background-color: #000000;
+            box-shadow: 0 3px #808080;
+            transform: translateY(3px);
+        }
+  </style>
+</head>
+<body>
+  <h1>Expense Tracker</h1>
+  <form id="expenseForm" class="form-content">
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" required>
+    <label for="category">Category:</label>
+    <input type="text" id="category" required>
+    <label for="date">Date:</label>
+    <input type="date" id="date" required>
+    <button type="button" onclick="addExpense()">Add Expense</button>
+  </form>
+
+  <p>Total Expenses: $<span id="total"><%= total %></span></p>
+
+  <h2>Expenses by Category:</h2>
+  <ul id="expensesList">
+    <% totalExpenses.forEach(expense => { %>
+      <li><%= expense.category %>: $<%= expense.total %></li>
+    <% }); %>
+  </ul>
+
+  <script>
+    function addExpense() {
+      const amount = document.getElementById('amount').value;
+      const category = document.getElementByName('category').value;
+      const date = document.getElementById('day').value;
+
+      fetch('/addExpense', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `amount=${amount}&category=${category}&date=${date}`,
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Update total and expenses list
+        document.getElementById('total').innerText = data.total;
+        const expensesList = document.getElementById('expensesList');
+        expensesList.innerHTML = '';
+        data.totalExpenses.forEach(expense => {
+          const li = document.createElement('li');
+          li.textContent = `${expense.category}: $${expense.total}`;
+          expensesList.appendChild(li);
+        });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+  </script>
+</body>
+</html>
